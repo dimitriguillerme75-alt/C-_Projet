@@ -4,7 +4,7 @@
 #define DONJON_HPP
 
 #include <vector>
-#include "Case.hpp"
+#include "case.hpp"
 
 class Donjon {
 private:
@@ -23,10 +23,11 @@ private:
 public:
     Donjon();
     ~Donjon();
-
+    Case* getCase(int x, int y) const;
     // On garde la même signature publique
     void generer(int l, int h);
-    void afficher();
+    // le -1 pour pour continuer a appeler afficher sans paramètre
+    void afficher(int playerX = -1, int playerY = -1);
 };
 
 #endif

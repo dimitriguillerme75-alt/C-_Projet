@@ -1,4 +1,4 @@
-#include "Donjon.hpp"
+#include "donjon.hpp"
 #include <iostream>  // Pour l'affichage en console (cout, endl)
 #include <algorithm> // Pour la fonction std::shuffle (qui va mélanger les directions)
 #include <random>    // Pour le moteur de génération de nombres aléatoires
@@ -34,7 +34,7 @@ void Donjon::generer(int l, int h) {
     // Initialisation : On remplit TOUTE la grille avec des murs.
     for (int i = 0; i < hauteur; ++i) {
         for (int j = 0; j < largeur; ++j) {
-            grille[i][j] = new Mur(); 
+            grille[i][j] = CaseFactory::creerCase(TypeCase::MUR);
         }
     }
 
@@ -50,11 +50,11 @@ void Donjon::generer(int l, int h) {
     // Finitions : On force la création d'une Entrée et d'une Sortie.
     // On détruit le mur en haut à gauche pour l'entrée...
     delete grille[1][1];
-    grille[1][1] = new Entree(); 
+    grille[1][1] = CaseFactory::creerCase(TypeCase::ENTREE);
     
     // ...et on détruit le mur en bas à droite pour la sortie.
     delete grille[hauteur-2][largeur-2];
-    grille[hauteur-2][largeur-2] = new Sortie(); 
+    grille[hauteur-2][largeur-2] = CaseFactory::creerCase(TypeCase::SORTIE);
 }
 
 // ========================================================
@@ -76,7 +76,7 @@ void Donjon::genererLabyrinthe(int x, int y, vector<vector<bool>>& visite) {
     
     // Étape B : On détruit le mur à cet emplacement et on le remplace par un passage
     delete grille[y][x];
-    grille[y][x] = new Passage();
+    grille[y][x] = CaseFactory::creerCase(TypeCase::PASSAGE);
 
     // Étape C : On prépare nos 4 directions de déplacement : Est, Sud, Ouest, Nord.
     // ATTENTION : On avance de DEUX cases (ex: {2, 0}) et non d'une seule ! 
@@ -104,7 +104,7 @@ void Donjon::genererLabyrinthe(int x, int y, vector<vector<bool>>& visite) {
             
             // On détruit ce mur intermédiaire pour relier notre case actuelle à la case cible
             delete grille[mur_y][mur_x];
-            grille[mur_y][mur_x] = new Passage();
+            grille[mur_y][mur_x] = CaseFactory::creerCase(TypeCase::PASSAGE);
 
             // MAGIE DE LA RÉCURSIVITÉ :
             // On relance la fonction DEPUIS la nouvelle case cible !
@@ -116,15 +116,25 @@ void Donjon::genererLabyrinthe(int x, int y, vector<vector<bool>>& visite) {
     }
 }
 
-// Parcourt tout le tableau 2D et affiche chaque case dans le terminal
-void Donjon::afficher() {
+Case* Donjon::getCase(int x, int y) const {
+    // Vérification de sécurité pour ne pas sortir du tableau
+    if (y >= 0 && y < hauteur && x >= 0 && x < largeur) {
+        return grille[y][x];
+    }
+    return nullptr;
+}
+
+void Donjon::afficher(int playerX, int playerY) {
     for (int i = 0; i < hauteur; ++i) {
         for (int j = 0; j < largeur; ++j) {
-            // POLYMORPHISME EN ACTION :
-            // On ne cherche pas à savoir si grille[i][j] est un Mur ou un Passage.
-            // On appelle juste afficher() et la bonne sous-classe retourne '#' ou ' ' !
-            cout << grille[i][j]->afficher() << " "; 
+            // Si la case actuelle correspond à la position du joueur, on affiche @
+            if (j == playerX && i == playerY) {
+                cout << "@ ";
+            } else {
+                // Sinon, on affiche le contenu normal de la case (Mur, Passage, etc.)
+                cout << grille[i][j]->afficher() << " "; 
+            }
         }
-        cout << endl; // Retour à la ligne pour dessiner la grille correctement
+        cout << endl;
     }
 }
