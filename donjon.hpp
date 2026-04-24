@@ -19,6 +19,9 @@ private:
     
     // Vérifie si des coordonnées sont valides dans la grille
     bool estValide(int x, int y);
+    // place tresor monstre et piege
+    void placerElements();
+
 
 public:
     Donjon();

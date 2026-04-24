@@ -1,15 +1,15 @@
 #ifndef CASE_HPP
 #define CASE_HPP
 
-// 1. L'énumération des types possibles (demandé par le PDF)
+// 1. L'énumération des types possibles 
 enum class TypeCase {
     MUR,
     PASSAGE,
     ENTREE,
     SORTIE,
-    TRESOR, // Prévu pour plus tard
-    MONSTRE, // Prévu pour plus tard
-    PIEGE   // Prévu pour plus tard
+    TRESOR, 
+    MONSTRE, 
+    PIEGE   
 };
 
 // --- Les classes existantes ---
@@ -39,6 +39,20 @@ class Sortie : public Case {
 public:
     char afficher() override { return 'S'; }
 };
+class Tresor : public Case {
+public:
+    char afficher() override { return 'T'; } // 'T' pour Trésor
+};
+
+class Monstre : public Case {
+public:
+    char afficher() override { return 'M'; } // 'M' pour Monstre
+};
+
+class Piege : public Case {
+public:
+    char afficher() override { return 'P'; } // 'P' pour Piège (Trap)
+};
 
 // 2. NOUVEAU : Le design pattern Factory !
 class CaseFactory {
@@ -50,10 +64,9 @@ public:
             case TypeCase::PASSAGE: return new Passage();
             case TypeCase::ENTREE:  return new Entree();
             case TypeCase::SORTIE:  return new Sortie();
-            // Tu pourras décommenter la suite quand tu auras créé les classes
-            // case TypeCase::TRESOR:  return new Tresor();
-            // case TypeCase::MONSTRE: return new Monstre();
-            // case TypeCase::PIEGE:   return new Piege();
+            case TypeCase::TRESOR:  return new Tresor();
+            case TypeCase::MONSTRE: return new Monstre();
+            case TypeCase::PIEGE:   return new Piege();
             default: return nullptr;
         }
     }

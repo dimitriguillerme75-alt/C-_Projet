@@ -55,6 +55,7 @@ void Donjon::generer(int l, int h) {
     // ...et on détruit le mur en bas à droite pour la sortie.
     delete grille[hauteur-2][largeur-2];
     grille[hauteur-2][largeur-2] = CaseFactory::creerCase(TypeCase::SORTIE);
+    placerElements();
 }
 
 // ========================================================
@@ -136,5 +137,40 @@ void Donjon::afficher(int playerX, int playerY) {
             }
         }
         cout << endl;
+    }
+}
+void Donjon::placerElements() {
+    // 1. Préparation du générateur de nombres aléatoires (entre 0 et 100)
+    unsigned seed = chrono::system_clock::now().time_since_epoch().count();
+    default_random_engine engine(seed);
+    uniform_int_distribution<int> distribution(0, 100);
+
+    // 2. On parcourt toute la grille en évitant les murs extérieurs
+    for (int i = 1; i < hauteur - 1; ++i) {
+        for (int j = 1; j < largeur - 1; ++j) {
+            
+            // On vérifie si la case actuelle est un Passage
+            // dynamic_cast teste si grille[i][j] est bien de type Passage*
+            if (dynamic_cast<Passage*>(grille[i][j]) != nullptr) {
+                
+                // C'est un passage ! On tire un nombre aléatoire
+                int r = distribution(engine);
+                
+                // Application des probabilités (5% Trésor, 5% Monstre, 3% Piège)
+                if (r < 5) {
+                    delete grille[i][j]; // On détruit le passage
+                    grille[i][j] = CaseFactory::creerCase(TypeCase::TRESOR);
+                } 
+                else if (r < 10) { // r est entre 5 et 9
+                    delete grille[i][j];
+                    grille[i][j] = CaseFactory::creerCase(TypeCase::MONSTRE);
+                } 
+                else if (r < 13) { // r est entre 10 et 12
+                    delete grille[i][j];
+                    grille[i][j] = CaseFactory::creerCase(TypeCase::PIEGE);
+                }
+                // Si r >= 13, on ne fait rien, ça reste un passage !
+            }
+        }
     }
 }
