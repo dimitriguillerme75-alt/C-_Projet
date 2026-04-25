@@ -2,7 +2,7 @@
 
 #ifndef DONJON_HPP
 #define DONJON_HPP
-
+#include <queue>
 #include <vector>
 #include "case.hpp"
 
@@ -31,6 +31,10 @@ public:
     void generer(int l, int h);
     // le -1 pour pour continuer a appeler afficher sans paramètre
     void afficher(int playerX = -1, int playerY = -1);
+    // Remplace la case aux coordonnées (x, y) par un Passage
+    void remplacerParPassage(int x, int y);
+    // Dans la section public de la classe Donjon
+    int calculerDistanceSortie(int startX, int startY) const;
 };
 
 #endif

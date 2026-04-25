@@ -24,7 +24,9 @@ public:
     void deplacer(int nx, int ny);
     void resoudreCase(Case* c);
     bool estVivant() const;
-    void afficherStatut() const;
+    void afficherStatut(int distanceSortie) const;
+    void combatMonstre();
+    bool fuirMonstre();
 
     // La méthode qui orchestre tout
     void boucleDeJeu(Donjon& d);

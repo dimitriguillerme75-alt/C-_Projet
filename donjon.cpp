@@ -3,7 +3,7 @@
 #include <algorithm> // Pour la fonction std::shuffle (qui va mélanger les directions)
 #include <random>    // Pour le moteur de génération de nombres aléatoires
 #include <chrono>    // Pour utiliser l'horloge du PC comme "graine" de l'aléatoire
-
+#include <queue>
 using namespace std; // Évite de devoir écrire std:: devant vector, cout, etc.
 
 
@@ -173,4 +173,52 @@ void Donjon::placerElements() {
             }
         }
     }
+}
+
+void Donjon::remplacerParPassage(int x, int y) {
+    // Vérification de sécurité pour ne pas sortir du tableau
+    if (x >= 0 && x < largeur && y >= 0 && y < hauteur) {
+        delete grille[y][x]; // On détruit l'ancien objet (Trésor, Monstre...)
+        grille[y][x] = CaseFactory::creerCase(TypeCase::PASSAGE); // On met un passage vide
+    }
+}
+
+int Donjon::calculerDistanceSortie(int startX, int startY) const {
+    // 1. Tableau des distances (-1 signifie non visité)
+    vector<vector<int>> distances(hauteur, vector<int>(largeur, -1));
+    
+    // 2. File pour le BFS
+    queue<pair<int, int>> file;
+    
+    file.push({startX, startY});
+    distances[startY][startX] = 0;
+
+    vector<pair<int, int>> directions = {{0, 1}, {0, -1}, {1, 0}, {-1, 0}};
+
+    while (!file.empty()) {
+        pair<int, int> actuel = file.front();
+        file.pop();
+
+        int cx = actuel.first;
+        int cy = actuel.second;
+
+        // Si on a atteint la sortie, on renvoie la distance accumulée
+        if (grille[cy][cx]->afficher() == 'S') {
+            return distances[cy][cx];
+        }
+
+        // On explore les voisins
+        for (auto dir : directions) {
+            int nx = cx + dir.first;
+            int ny = cy + dir.second;
+
+            if (nx >= 0 && nx < largeur && ny >= 0 && ny < hauteur &&
+                distances[ny][nx] == -1 && grille[ny][nx]->afficher() != '#') {
+                
+                distances[ny][nx] = distances[cy][cx] + 1;
+                file.push({nx, ny});
+            }
+        }
+    }
+    return -1; // Chemin impossible
 }
