@@ -4,7 +4,7 @@
 #include <random>    // Pour le moteur de génération de nombres aléatoires
 #include <chrono>    // Pour utiliser l'horloge du PC comme "graine" de l'aléatoire
 #include <queue>
-using namespace std; // Évite de devoir écrire std:: devant vector, cout, etc.
+using namespace std; 
 
 
 // Constructeur : Initialise un donjon vide avec des dimensions à 0 au départ

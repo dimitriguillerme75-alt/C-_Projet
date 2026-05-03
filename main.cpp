@@ -1,7 +1,6 @@
 #include "donjon.hpp"
-#include "aventurier.hpp" // Ne pas oublier d'inclure notre nouveau joueur !
+#include "aventurier.hpp" 
 #include <iostream>
-
 using namespace std; 
 
 int main() {
@@ -11,14 +10,13 @@ int main() {
 
     cout << "=== Generation du donjon (" << largeur << "x" << hauteur << ") ===" << endl;
     
-    // 1. On prépare le terrain
+    // On génère le donjon
     monDonjon.generer(largeur, hauteur);
     
-    // 2. On crée notre héros à la position (1, 1), qui correspond à l'Entrée 'E'
+    // On crée notre héros à la position (1, 1)
     Aventurier joueur(1, 1);
 
-    // 3. On lance la boucle infinie du jeu !
-    // (L'affichage du donjon se fera désormais à l'intérieur de cette boucle)
+    // On lance la boucle infinie du jeu 
     joueur.boucleDeJeu(monDonjon);
     
     return 0;
