@@ -62,10 +62,10 @@ bool Donjon::estValide(int x, int y) {// vérifie que la case est bien dans le d
 
 
 
-//  cest lalgo récursif : algo qui sappelle lui meme, (on lutilise dans generer donjon)
+//  cest l'algo récursif : algo qui sappelle lui meme, (on lutilise dans generer donjon)
 void Donjon::genererLabyrinthe(int x, int y, vector<vector<bool>>& visite) {
     // récupere la position actuelle et le tableau des cases visités 
-    //-> oblgé de mettre & car sinn on recrée un tab a chaque fois, la on met juste a jour
+    //-> oblgé de mettre & car sinon on recrée un tab a chaque fois, la on met juste a jour
      
     visite[y][x] = true; // On marque la case sur laquelle on se trouve comme visitée
     
@@ -99,11 +99,11 @@ void Donjon::genererLabyrinthe(int x, int y, vector<vector<bool>>& visite) {
             grille[mur_y][mur_x] = CaseFactory::creerCase(TypeCase::PASSAGE);
 
             // Ici système récursif :
-            // on est dans une boucle for, on va donc boucler jusqua avoir tester toute les possibilités disponibles
-            // on avance jusqua arriver dans un cas ou on peut plus creer de chemin
-            //une fois que c'est fait, on revient a la derniere position valide
+            // on est dans une boucle for, on va donc boucler jusqu'a avoir testé toute les possibilités disponibles
+            // on avance jusqu'a arriver dans un cas ou on peut plus creer de chemin
+            //une fois que c'est fait, on revient à la derniere position valide
             // de celle ci on teste un autre chemin
-            // et ainsi de suite jusqua avoir tout tester   
+            // et ainsi de suite jusqu'a avoir tout tester   
             genererLabyrinthe(nx, ny, visite);
         }
     }
@@ -189,7 +189,6 @@ void Donjon::remplacerParPassage(int x, int y) {
 int Donjon::calculerDistanceSortie(int startX, int startY) const { 
     // on remplie un tableau avec que des -1 (case pas explorée)
     vector<vector<int>> distances(hauteur, vector<int>(largeur, -1));
-    //si on est au dessus ca devient un 0, cest pour ca qu'on met -1 car on cherche la plus petite distance
 
     
     // on crée une file dattente qui stock des coordonnées
@@ -217,8 +216,8 @@ int Donjon::calculerDistanceSortie(int startX, int startY) const {
             int nx = cx + dir.first;
             int ny = cy + dir.second;
 
-            if (nx >= 0 && nx < largeur && ny >= 0 && ny < hauteur && //on verifie quon est dans le labyrinthe 
-                distances[ny][nx] == -1 && grille[ny][nx]->afficher() != '#') {// et qu'on est pas déja passé par la et que cest pas un mur
+            if (nx >= 0 && nx < largeur && ny >= 0 && ny < hauteur && //on verifie qu'on est dans le labyrinthe 
+                distances[ny][nx] == -1 && grille[ny][nx]->afficher() != '#') {// et qu'on est pas déja passé par la et que c'est pas un mur
                 
                 distances[ny][nx] = distances[cy][cx] + 1; //la nouvelle taille du chemin
                 file.push({nx, ny});//on met a jour notre file dattente
