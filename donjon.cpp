@@ -19,29 +19,28 @@ Donjon::~Donjon() {
     }
 }
 
-// A BIEN COMPRENDRE ET COMMENTER
+
 // Prépare la grille et lance l'algorithme de création du labyrinthe
 void Donjon::generer(int l, int h) {
     largeur = l;
     hauteur = h;
+
+    grille.resize(hauteur, vector<Case*>(largeur, nullptr)); // permet de mettre le tab a la bonne taille
+    // on le remplit de pointeurs nuls, on a donc un tableau de pointeurs nuls de taille l x h
     
-    // On redimensionne le tableau 2D pour qu'il ait la bonne taille (hauteur x largeur)
-    // On le remplit initialement avec des pointeurs vides (nullptr)
-    grille.resize(hauteur, vector<Case*>(largeur, nullptr));
-    
-    // Initialisation : On remplit toute la grille avec des murs.
+    //On remplit toute la grille avec des murs
     for (int i = 0; i < hauteur; ++i) {
         for (int j = 0; j < largeur; ++j) {
             grille[i][j] = CaseFactory::creerCase(TypeCase::MUR);
         }
     }
 
-    //  On crée un tableau 2D de booléens de la même taille que la grille.
-    // Il sert à mémoriser quelles cases ont déjà été creusées/visitées par l'algorithme.
-    // On l'initialise entièrement à false au début (cases non visité).
+    //  On crée un tableau 2D de booléens de la même taille que la grille
+    // On l'initialise entièrement à false au début 
+    // false car pas visité, true quand visité
     vector<vector<bool>> visite(hauteur, vector<bool>(largeur, false));
 
-    //  On lance la (l'algorithme récursif) en partant de la case (1, 1) 
+    //  On lance lalgo recursif en partant de la case (1, 1) 
     genererLabyrinthe(1, 1, visite);
     
     // On détruit le mur en haut à gauche pour  y mettre l'entrée
@@ -50,31 +49,30 @@ void Donjon::generer(int l, int h) {
     
     // on détruit le mur en bas à droite pour y mettre la sortie
     delete grille[hauteur-2][largeur-2];
-    grille[hauteur-2][largeur-2] = CaseFactory::creerCase(TypeCase::SORTIE);
+    grille[hauteur-2][largeur-2] = CaseFactory::creerCase(TypeCase::SORTIE);//-2 car on est entouré de murs
     placerElements();
 }
 
 
-// On vérifie si la case qu'on veut creuser est bien à l'intérieur du donjon.
-// ( > 0 et < largeur - 1 pour bien laisser les murs aux extrémités)
-bool Donjon::estValide(int x, int y) {
-    return (x > 0 && x < largeur - 1 && y > 0 && y < hauteur - 1);
+
+
+bool Donjon::estValide(int x, int y) {// vérifie que la case est bien dans le donjon
+    return (x > 0 && x < largeur - 1 && y > 0 && y < hauteur - 1);// > 0 et < largeur - 1 pour bien laisser les murs aux extrémités
 }
 
-// BIEN COMPRENDRE SYSTEME RECURSIF
-// Le cœur du moteur : l'algorithme de creusage qui s'appelle lui-même (fonction récursive)
-// Il reçoit la position courante (x, y) et le tableau des cases visitées en référence (&).
+
+
+//  cest lalgo récursif : algo qui sappelle lui meme, (on lutilise dans generer donjon)
 void Donjon::genererLabyrinthe(int x, int y, vector<vector<bool>>& visite) {
-    
-    // On marque la case sur laquelle on se trouve comme visitée 
-    // (en modifiant le tableau de bool initialisé dans la fonction generer)
-    visite[y][x] = true;
+    // récupere la position actuelle et le tableau des cases visités 
+    //-> oblgé de mettre & car sinn on recrée un tab a chaque fois, la on met juste a jour
+     
+    visite[y][x] = true; // On marque la case sur laquelle on se trouve comme visitée
     
     // On détruit le mur à cet emplacement et on le remplace par un passage
     delete grille[y][x];
     grille[y][x] = CaseFactory::creerCase(TypeCase::PASSAGE);
 
-    // On prépare nos 4 directions de déplacement (Haut, Bas, Gauche et Droite)
     // On avance de deux cases Pour toujours laisser un mur d'épaisseur entre deux couloirs.
     vector<pair<int, int>> directions = { {2, 0}, {0, 2}, {-2, 0}, {0, -2} };
 
@@ -86,26 +84,26 @@ void Donjon::genererLabyrinthe(int x, int y, vector<vector<bool>>& visite) {
 
     // On essaie d'avancer dans chacune des 4 directions, l'une après l'autre
     for (const auto& dir : directions) {
-        int nx = x + dir.first;  // Nouvelle position X (colonne cible, à +2 ou -2)
-        int ny = y + dir.second; // Nouvelle position Y (ligne cible, à +2 ou -2)
+        int nx = x + dir.first;  // nouvelle position en x, soit on a avance de 2 soit reculé de 2
+        int ny = y + dir.second; // pareil en y
 
-        // Si la case cible (à 2 pas de distance) est dans les limites et n'a jamais été visitée
-        if (estValide(nx, ny) && !visite[ny][nx]) {
+        
+        if (estValide(nx, ny) && !visite[ny][nx]) {// verifie Si la ou on se trouve mtn est dans les limites et n'a jamais été visitée
             
-            // on calcule les coordonnées du mur qui se trouve exactement
-            // notre position actuelle et la case cible (donc à 1 pas)
-            int mur_x = x + dir.first / 2;
+            // on recupere les coordonnées du mur qu'on vient de sauter
+            int mur_x = x + dir.first / 2; 
             int mur_y = y + dir.second / 2;
             
-            // On détruit ce mur intermédiaire pour relier notre case actuelle à la case cible
+            // on le détruit pour avoir un passage
             delete grille[mur_y][mur_x];
             grille[mur_y][mur_x] = CaseFactory::creerCase(TypeCase::PASSAGE);
 
             // Ici système récursif :
-            // On relance la fonction depuis la nouvelle case cible 
-            // L'algorithme va continuer de creuser jusqu'à être coincé dans une impasse.
-            // Une fois coincé, la fonction se termine et l'algorithme "remonte" (backtrack) 
-            // pour essayer les autres directions laissées en attente dans la boucle for.
+            // on est dans une boucle for, on va donc boucler jusqua avoir tester toute les possibilités disponibles
+            // on avance jusqua arriver dans un cas ou on peut plus creer de chemin
+            //une fois que c'est fait, on revient a la derniere position valide
+            // de celle ci on teste un autre chemin
+            // et ainsi de suite jusqua avoir tout tester   
             genererLabyrinthe(nx, ny, visite);
         }
     }
@@ -188,25 +186,26 @@ void Donjon::remplacerParPassage(int x, int y) {
     }
 }
 
-// COMPRENDRE BIEN LE FONCTIONNEMENT (ALGO BFS? ) ET COMMENTER
-int Donjon::calculerDistanceSortie(int startX, int startY) const {
-    // 1. Tableau des distances (-1 signifie non visité)
+int Donjon::calculerDistanceSortie(int startX, int startY) const { 
+    // on remplie un tableau avec que des -1 (case pas explorée)
     vector<vector<int>> distances(hauteur, vector<int>(largeur, -1));
+    //si on est au dessus ca devient un 0, cest pour ca qu'on met -1 car on cherche la plus petite distance
+
     
-    // 2. File pour le BFS
+    // on crée une file dattente qui stock des coordonnées
     queue<pair<int, int>> file;
     
-    file.push({startX, startY});
-    distances[startY][startX] = 0;
+    file.push({startX, startY}); // on met les coordonnées de départ dans la file 
+    distances[startY][startX] = 0; // on met a jour le tableau
 
-    vector<pair<int, int>> directions = {{0, 1}, {0, -1}, {1, 0}, {-1, 0}};
+    vector<pair<int, int>> directions = {{0, 1}, {0, -1}, {1, 0}, {-1, 0}}; //on crée un vecteur direction comme pour l'algo recursif
 
     while (!file.empty()) {
-        pair<int, int> actuel = file.front();
-        file.pop();
+        pair<int, int> actuel = file.front();//on recupere les coordonnes du premier de la file dattente
+        file.pop();//on le sort de la file 
 
         int cx = actuel.first;
-        int cy = actuel.second;
+        int cy = actuel.second; 
 
         // Si on a atteint la sortie, on renvoie la distance accumulée
         if (grille[cy][cx]->afficher() == 'S') {
@@ -214,17 +213,17 @@ int Donjon::calculerDistanceSortie(int startX, int startY) const {
         }
 
         // On explore les voisins
-        for (auto dir : directions) {
+        for (auto dir : directions) { //auto permet de verifier toute les directions
             int nx = cx + dir.first;
             int ny = cy + dir.second;
 
-            if (nx >= 0 && nx < largeur && ny >= 0 && ny < hauteur &&
-                distances[ny][nx] == -1 && grille[ny][nx]->afficher() != '#') {
+            if (nx >= 0 && nx < largeur && ny >= 0 && ny < hauteur && //on verifie quon est dans le labyrinthe 
+                distances[ny][nx] == -1 && grille[ny][nx]->afficher() != '#') {// et qu'on est pas déja passé par la et que cest pas un mur
                 
-                distances[ny][nx] = distances[cy][cx] + 1;
-                file.push({nx, ny});
+                distances[ny][nx] = distances[cy][cx] + 1; //la nouvelle taille du chemin
+                file.push({nx, ny});//on met a jour notre file dattente
             }
         }
     }
-    return -1; // Chemin impossible
+    return -1; // Chemin impossible, au cas ou
 }
