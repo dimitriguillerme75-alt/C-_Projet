@@ -33,33 +33,35 @@ void Aventurier::afficherStatut(int distanceSortie) const {
 }
 
 void Aventurier::resoudreCase(Case* c) {
-    // 1. Est-ce un Trésor ?
+    // case trésor
     if (dynamic_cast<Tresor*>(c) != nullptr) {
         tresors++;
-        cout << "\n>>> Super ! Vous avez trouve un tresor ! <<<" << endl;
+        cout << "\n>>> Vous avez trouvé un tresor ! (+1 trésor) <<<" << endl;
     } 
-    // 2. Est-ce un Piège ?
+    // case piège
     else if (dynamic_cast<Piege*>(c) != nullptr) {
-        pv -= 10; 
-        cout << "\n>>> AIE ! Vous avez marche sur un piege ! (-10 PV) <<<" << endl;
+        pv -= 20; 
+        cout << "\n>>> Vous avez marché sur un piège ! (-20 PV) <<<" << endl;
     }
-    // 3. Est-ce un Monstre ?
+    // case monstre
     else if (dynamic_cast<Monstre*>(c) != nullptr) {
-        cout << "\n>>> UN MONSTRE SE DRESSE DEVANT VOUS ! <<<" << endl;
-        cout << "Voulez-vous (c)ombattre pour des tresors ou (f)uir ? : ";
+        cout << "\n>>> Un monstre vous attaque ! <<<" << endl;
+        cout << "Voulez-vous (c)ombattre pour des trésors ou (f)uir ? (c/f): ";
         char choix;
         cin >> choix;
 
+        // si il choisit la touche c on lance le combat (pierre/feuille/ciseaux)
         if (choix == 'c' || choix == 'C') {
-            combatMonstre(); // On lance le mini-jeu
+            combatMonstre(); 
+        // si il choisit la touche f (ou autre que c), 
+        // on passe à la case suivante et le monstre reste sur la case
         } else {
-            cout << "\nVous fuyez comme un poltron... Le monstre ricane." << endl;
-            // Note : Le monstre reste sur la case car on n'a pas combattu
+            cout << "\nVous fuyez par peur, la honteee" << endl;
         }
     }
-    // 4. Est-ce la Sortie ?
+    // case sortie
     else if (dynamic_cast<Sortie*>(c) != nullptr) {
-        cout << "\n>>> VOUS AVEZ TROUVE LA SORTIE ! <<<" << endl;
+        cout << "\n>>> VOUS AVEZ TROUVE LA SORTIE, A VOUS LA RICHESSE !!! <<<" << endl;
     }
 }
 
@@ -69,14 +71,14 @@ void Aventurier::boucleDeJeu(Donjon& d) {
 
     // La boucle tourne tant qu'on est en vie et qu'on n'a pas gagné
     while (estVivant() && !aGagne) {
-        // 1. Afficher l'état du jeu
+        // Affiche l'état du jeu
         // On passe notre position x et y au donjon pour qu'il dessine le @
         d.afficher(x, y);
         // Calcul du radar BFS avant l'affichage
         int dist = d.calculerDistanceSortie(x, y);
         afficherStatut(dist);
 
-        // 2. Demander l'action au joueur
+        // On demande l'action au joueur
         cout << "Deplacement (z:Haut, s:Bas, q:Gauche, d:Droite) ou p:Quitter : ";
         cin >> action;
 
@@ -89,44 +91,44 @@ void Aventurier::boucleDeJeu(Donjon& d) {
             case 'q': nx--; break; // Gauche
             case 'd': nx++; break; // Droite
             case 'p': cout << "Abandon..." << endl; return;
-            default: cout << "Touche non reconnue." << endl; continue;
+            default: cout << "Touche non reconnue, réessayez." << endl; continue;
         }
 
-        // --- LOGIQUE DE DÉPLACEMENT ET COLLISION ---
+        // logique de déplacement et collision
 
         Case* caseCible = d.getCase(nx, ny);
 
-        // 2. On vérifie si la case existe et si ce n'est pas un mur '#'
+        // On vérifie si la case existe et si ce n'est pas un mur (#)
         if (caseCible != nullptr && caseCible->afficher() != '#') {
             
-            // On sauvegarde le symbole AVANT de résoudre la case
+            // On sauvegarde le symbole avant de résoudre la case
             char symbole = caseCible->afficher();
 
             // On se déplace et on applique l'effet
             deplacer(nx, ny);
             resoudreCase(caseCible);
             
-            // On vérifie les conditions de victoire ou de nettoyage
+            // Si on arrive sur la sortie, on gagne
             if (symbole == 'S') {
                 aGagne = true;
             } 
-            // Si c'est un objet interactif, on le détruit de la carte
+            // Si c'est un objet interactif, on le détruit en le remplaçant par un simple passage
             else if (symbole == 'T' || symbole == 'M' || symbole == 'P') {
                 d.remplacerParPassage(nx, ny);
             }
 
         } else {
-            cout << "Aie ! Vous foncez dans un mur !" << endl;
+            cout << "Vous foncez dans un mur, regardez devant vous !" << endl;
         }
     }
 
     if (aGagne) {
         cout << "\n=========================================" << endl;
-        cout << " FELICITATIONS ! Vous etes sorti vivant !" << endl;
-        cout << " Tresors ramasses : " << tresors << endl;
+        cout << " FELICITATIONS ! Vous êtes sorti vivant !" << endl;
+        cout << " Trésors ramassés : " << tresors << endl;
         cout << "=========================================\n" << endl;
     } else if (!estVivant()) {
-        cout << "\nVous etes mort... Game Over!" << endl;
+        cout << "\nVous êtes mort lamentablement... >>> DEFAITE ! <<< " << endl;
     }
 }
 
@@ -137,13 +139,13 @@ void Aventurier::combatMonstre() {
     int victoiresJoueur = 0;
     int victoiresMonstre = 0;
     
-    // Initialisation de l'aléatoire
+    // On initialise l'aléatoire
     unsigned seed = chrono::system_clock::now().time_since_epoch().count();
     default_random_engine engine(seed);
-    uniform_int_distribution<int> choixMonstre(1, 3); // 1: Pierre, 2: Feuille, 3: Ciseaux
+    uniform_int_distribution<int> choixMonstre(1, 3); // 1 = Pierre, 2 = Feuille, 3 = Ciseaux
     uniform_int_distribution<int> rollRecompense(1, 100);
 
-    cout << "\n--- DEBUT DU COMBAT (Premier a 3 victoires) ---" << endl;
+    cout << "\n--- DEBUT DU COMBAT (Premier à 3 victoires) ---" << endl;
 
     while (victoiresJoueur < 3 && victoiresMonstre < 3) {
         cout << "\nScore : Vous " << victoiresJoueur << " - " << victoiresMonstre << " Monstre" << endl;
@@ -162,9 +164,9 @@ void Aventurier::combatMonstre() {
         cout << "Vous : " << noms[choixJ] << " | Monstre : " << noms[choixM] << endl;
 
         if (choixJ == choixM) {
-            cout << "Egalite ! On recommence la manche." << endl;
+            cout << "Egalité ! On recommence la manche." << endl;
         } else if ((choixJ == 1 && choixM == 3) || (choixJ == 2 && choixM == 1) || (choixJ == 3 && choixM == 2)) {
-            cout << "Gagne ! Vous remportez la manche." << endl;
+            cout << "Gagné ! Vous remportez la manche." << endl;
             victoiresJoueur++;
         } else {
             cout << "Perdu ! Le monstre remporte la manche." << endl;
@@ -172,31 +174,36 @@ void Aventurier::combatMonstre() {
         }
     }
 
-    // --- RESULTATS DU MATCH ---
+    // Résultat du combat 
+
+    // Si le joueur gagne
     if (victoiresJoueur == 3) {
-        cout << "\nVICTOIRE !" << endl;
+        cout << "\nVICTOIRE ! le Monstre s'en va désespéré..." << endl;
+        // Si le joueur a gagné 3-0, il gagne un certain nombre de trésor
         if (victoiresMonstre == 0) {
-            // Victoire 3-0 : Tirage des trésors
             int chance = rollRecompense(engine);
             int gain = 0;
-            if (chance <= 10) gain = 3;      // 10% de chance
-            else if (chance <= 35) gain = 2; // 25% de chance (10 + 25)
-            else gain = 1;                  // 65% de chance
+            if (chance <= 10) gain = 3;      // 10% de chance de gagner 3 trésor
+            else if (chance <= 35) gain = 2; // 25% de chance de gagner 2 trésor
+            else gain = 1;                  // 65% de chance de gagner 1 trésor
 
             tresors += gain;
-            cout << "PERFECT ! Le monstre lache ses objets. Vous gagnez " << gain << " tresor(s) !" << endl;
-        } else {
-            cout << "Vous passez de justesse. Le monstre s'enfuit sans rien laisser." << endl;
+            cout << "3-0! Vous ramassez le butin du monstre. Vous gagnez " << gain << " tresor(s) !" << endl;
+        } 
+        // Si le joueur gagne 3-1 ou 3-2
+        else {
+            cout << "Vous passez de justesse. Le monstre s'enfuit en gardant son butin." << endl;
         }
-    } else {
-        // Defaite
+    } 
+    // Si le joueur perd
+    else {
         cout << "\nDEFAITE..." << endl;
         if (tresors > 0) {
             tresors--;
-            cout << "Le monstre vous a blesse et vole un tresor !" << endl;
+            cout << "Le monstre vous vole un trésor !" << endl;
         } else {
             pv = 0;
-            cout << "Vous n'avez plus de tresors pour negocier votre vie... LE MONSTRE VOUS ACHEVE !" << endl;
+            cout << "Vous n'avez plus de tresors pour négocier votre vie... !" << endl;
         }
     }
 }

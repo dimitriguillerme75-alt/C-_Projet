@@ -4,10 +4,12 @@
 // on énumère les types possibles 
 enum class TypeCase {MUR, PASSAGE, ENTREE, SORTIE, TRESOR, MONSTRE, PIEGE};
 
-
+// classe mère Case
 class Case {
     public:
+        // méthode virtuelle pure 
         virtual char afficher() = 0;
+        // destructeur virtuel
         virtual ~Case() = default; 
 };
 
@@ -38,15 +40,16 @@ class Tresor : public Case {
 
 class Monstre : public Case {
     public:
-        char afficher() override { return 'M'; } // 'M' pour Monstre
+        char afficher() override { return 'M'; }
 };
 
 class Piege : public Case {
     public:
-        char afficher() override { return 'P'; } // 'P' pour Piège (Trap)
+        char afficher() override { return 'P'; } 
 };
 
-
+// On applique le design patern factory 
+// en utilisant cette classe pour s'occuper de la création des différentes cases
 class CaseFactory {
     public:
         // Méthode statique pour créer n'importe quelle case

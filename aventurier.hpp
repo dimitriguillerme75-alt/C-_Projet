@@ -13,7 +13,7 @@ class Aventurier {
         int tresors;    // Nombre de trésors ramassés
 
     public:
-        // Constructeur : initialise l'aventurier à une position de départ
+        // Constructeur qui initialise l'aventurier à une position de départ
         Aventurier(int startX, int startY);
 
         // Getters

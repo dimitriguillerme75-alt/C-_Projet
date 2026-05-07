@@ -8,7 +8,7 @@ int main() {
     int largeur = 21;
     int hauteur = 21;
 
-    cout << "=== Generation du donjon (" << largeur << "x" << hauteur << ") ===" << endl;
+    cout << "Generation du donjon de taille : (" << largeur << "x" << hauteur << ") " << endl;
     
     // On génère le donjon
     monDonjon.generer(largeur, hauteur);
